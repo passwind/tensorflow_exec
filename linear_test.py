@@ -73,8 +73,17 @@ age_buckets_x_race_x_occupation = tf.contrib.layers.crossed_column(
   [age_buckets, race, occupation], hash_bucket_size=int(1e6))
 
 model_dir=tempfile.mkdtemp()
-m=tf.contrib.learn.LinearClassifier(feature_columns=[gender,native_country, education, occupation, workclass, marital_status, race,
+# m=tf.contrib.learn.LinearClassifier(feature_columns=[gender,native_country, education, occupation, workclass, marital_status, race,
+#   age_buckets, education_x_occupation, age_buckets_x_race_x_occupation],
+#   model_dir=model_dir)
+
+m = tf.contrib.learn.LinearClassifier(feature_columns=[
+  gender, native_country, education, occupation, workclass, marital_status, race,
   age_buckets, education_x_occupation, age_buckets_x_race_x_occupation],
+  optimizer=tf.train.FtrlOptimizer(
+    learning_rate=0.1,
+    l1_regularization_strength=1.0,
+    l2_regularization_strength=1.0),
   model_dir=model_dir)
 
 m.fit(input_fn=train_input_fn,steps=2000)
@@ -85,6 +94,8 @@ for key in sorted(results):
 
 """
 2016-11-08 18:03
+without regularization
+
 accuracy: 0.837111
 accuracy/baseline_target_mean: 0.236226
 accuracy/threshold_0.500000_mean: 0.837111
@@ -95,4 +106,20 @@ labels/prediction_mean: 0.238146
 loss: 0.347982
 precision/positive_threshold_0.500000_mean: 0.700336
 recall/positive_threshold_0.500000_mean: 0.542642
+"""
+
+"""
+2016-11-08 18:12
+with regularization
+
+accuracy: 0.836926
+accuracy/baseline_target_mean: 0.236226
+accuracy/threshold_0.500000_mean: 0.836926
+auc: 0.884177
+global_step: 2000
+labels/actual_target_mean: 0.236226
+labels/prediction_mean: 0.239321
+loss: 0.351251
+precision/positive_threshold_0.500000_mean: 0.707275
+recall/positive_threshold_0.500000_mean: 0.528341
 """
